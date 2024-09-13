@@ -1,7 +1,7 @@
-# Docs for the Azure Web Apps Deploy action: https://github.com/azure/functions-action
+# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
 # More GitHub Actions for Azure: https://github.com/Azure/actions
 
-name: Build and deploy Node.js project to Azure Function App - phso-hornbill-assets
+name: Build and deploy Node.js app to Azure Web App - phso-hornbill-assets
 
 on:
   push:
@@ -9,30 +9,23 @@ on:
       - main
   workflow_dispatch:
 
-env:
-  AZURE_FUNCTIONAPP_PACKAGE_PATH: '.' # set this to the path to your web app project, defaults to the repository root
-  NODE_VERSION: '20.x' # set this to the node version to use (supports 8.x, 10.x, 12.x)
-
 jobs:
   build:
     runs-on: ubuntu-latest
-    steps:
-      - name: 'Checkout GitHub Action'
-        uses: actions/checkout@v4
 
-      - name: Setup Node ${{ env.NODE_VERSION }} Environment
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Node.js version
         uses: actions/setup-node@v3
         with:
-          node-version: ${{ env.NODE_VERSION }}
+          node-version: '20.x'
 
-      - name: 'Resolve Project Dependencies Using Npm'
-        shell: bash
+      - name: npm install, build, and test
         run: |
-          pushd './${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}'
           npm install
           npm run build --if-present
           npm run test --if-present
-          popd
 
       - name: Zip artifact for deployment
         run: zip release.zip ./* -r
@@ -64,15 +57,15 @@ jobs:
       - name: Login to Azure
         uses: azure/login@v2
         with:
-          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_290827FA34FD4883995EFCBE8B3EAD48 }}
-          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_CC85CC56B549434992B0A1AE1A716551 }}
-          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_656133BD5ED049A3A71F854D7EC4715F }}
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_6FD7CBFAEEE04E3AAB60C1154313682A }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_10DB37BFACB0494C8A99D88C3814FEF0 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_DEFA917B8D024348A8AFD9A2A611571E }}
 
-      - name: 'Run Azure Functions Action'
-        uses: Azure/functions-action@v1
-        id: fa
+      - name: 'Deploy to Azure Web App'
+        id: deploy-to-webapp
+        uses: azure/webapps-deploy@v3
         with:
           app-name: 'phso-hornbill-assets'
           slot-name: 'Production'
-          package: ${{ env.AZURE_FUNCTIONAPP_PACKAGE_PATH }}
+          package: .
           
