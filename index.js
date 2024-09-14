@@ -3,7 +3,11 @@ const express = require("express");
 const fs = require("fs/promises");
 
 let app = express();
-let port = 3000;
+let port = process.env.PORT || 3000;
+
+app.get("/", (req, res) => {
+  res.send("CSV to JSON API is up and running");
+});
 
 app.post("/convert", async (req, res) => {
   console.log("New convert request received");
@@ -35,6 +39,6 @@ app.post("/convert", async (req, res) => {
   }
 });
 
-app.listen(port ?? 3000, () => {
-  console.log("Server listening on port " + port ?? 3000);
+app.listen(port, () => {
+  console.log("Server listening on port " + port);
 });
